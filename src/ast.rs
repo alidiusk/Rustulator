@@ -2,21 +2,23 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
-  Num(i32),
+  Num(f64),
   Add(Box<Expr>, Box<Expr>),
   Sub(Box<Expr>, Box<Expr>),
   Mul(Box<Expr>, Box<Expr>),
   Div(Box<Expr>, Box<Expr>),
+  Pow(Box<Expr>, Box<Expr>),
   Neg(Box<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-  Num(i32),
+  Num(f64),
   Add,
   Sub,
   Mul,
   Div,
+  Pow,
   RParen,
   LParen,
   Eof,
@@ -30,6 +32,7 @@ impl Token {
     match *self {
       Add | Sub => Sum,
       Mul | Div => Product,
+      Pow       => Power,
       // should be unreachable...
       _ => Lowest,
     }
@@ -46,6 +49,7 @@ impl fmt::Display for Token {
       Sub => write!(f, "Sub"),
       Mul => write!(f, "Mul"),
       Div => write!(f, "Div"),
+      Pow => write!(f, "Pow"),
       LParen => write!(f, "("),
       RParen => write!(f, ")"),
       Eof => write!(f, "Eof"),
@@ -58,6 +62,7 @@ pub enum Precedence {
   Lowest,
   Sum,
   Product,
+  Power,
   Prefix,
 }
 
@@ -67,13 +72,13 @@ mod tests {
 
   #[test]
   fn test_token() {
-    let num = Token::Num(32);
-    assert_eq!(Token::Num(32), num);
+    let num = Token::Num(32.0);
+    assert_eq!(Token::Num(32.0), num);
   }
 
   #[test]
   fn test_expr() {
-    let addition = Expr::Add(box Expr::Num(32), box Expr::Num(16));
-    assert_eq!(Expr::Add(box Expr::Num(32), box Expr::Num(16)), addition);
+    let addition = Expr::Add(box Expr::Num(32.0), box Expr::Num(16.0));
+    assert_eq!(Expr::Add(box Expr::Num(32.0), box Expr::Num(16.0)), addition);
   }
 }

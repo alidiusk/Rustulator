@@ -1,8 +1,10 @@
 use std::error;
+use std::option::NoneError;
+
 use std::fmt;
 
 use crate::ast::{Expr, Precedence, Token};
-use crate::lexer::Lexer;
+use crate::lexer::{Lexer};
 
 #[derive(Debug)]
 pub struct Parser<'a> {
@@ -15,21 +17,22 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-  pub fn new(source: &'a str) -> Self {
+  pub fn new(source: &'a str) -> Result<Self, ParseError> {
     let mut lexer = Lexer::new(source);
-    let cur = lexer.next().unwrap();
-    let peek = lexer.next().unwrap();
+    let cur = lexer.next()?;
+    let peek = lexer.next()?;
 
-    Parser {
+    Ok(Parser {
       lexer: lexer,
       current_token: cur,
       peek_token: peek,
-    }
+    })
   }
 
-  fn next_token(&mut self) {
+  fn next_token(&mut self) -> Result<(), ParseError> {
     self.current_token = self.peek_token.clone();
-    self.peek_token = self.lexer.next().unwrap();
+    self.peek_token = self.lexer.next()?;
+    Ok(())
   }
   
   pub fn parse(&mut self) -> Result<Expr, ParseError> {
@@ -58,24 +61,29 @@ impl<'a> Parser<'a> {
   fn parse_infix_op(&mut self, left: Expr) -> Result<Expr, ParseError> {
     match self.current_token {
       Token::Add => {
-        self.next_token();
+        self.next_token()?;
         let right = self.parse_expr(Precedence::Sum)?;
         Ok(Expr::Add(box left, box right))
       },
       Token::Sub => {
-        self.next_token();
+        self.next_token()?;
         let right = self.parse_expr(Precedence::Sum)?;
         Ok(Expr::Sub(box left, box right))
       },
       Token::Mul => {
-        self.next_token();
+        self.next_token()?;
         let right = self.parse_expr(Precedence::Product)?;
         Ok(Expr::Mul(box left, box right))
       },
       Token::Div => {
-        self.next_token();
+        self.next_token()?;
         let right = self.parse_expr(Precedence::Product)?;
         Ok(Expr::Div(box left, box right))
+      },
+      Token::Pow => {
+        self.next_token()?;
+        let right = self.parse_expr(Precedence::Power)?;
+        Ok(Expr::Pow(box left, box right))
       },
       _ => {
         Err(ParseError::InvalidInput(
@@ -88,11 +96,15 @@ impl<'a> Parser<'a> {
     let token = self.current_token.clone();
     match token {
       Token::Num(i) => { 
-        self.next_token();
+        self.next_token()?;
+        if(self.current_token == Token::LParen) {
+          let right = self.parse_expr(Precedence::Product)?;
+          return Ok(Expr::Mul(box Expr::Num(i), box right));
+        }
         Ok(Expr::Num(i))
       },
       Token::LParen => {
-        self.next_token();
+        self.next_token()?;
         let expr = self.parse_expr(Precedence::Lowest)?;
         self.expect(Token::RParen)?;
         Ok(expr)
@@ -105,7 +117,7 @@ impl<'a> Parser<'a> {
 
   fn expect(&mut self, expected: Token) -> Result<(), ParseError> {
     if expected == self.current_token {
-      self.next_token();
+      self.next_token()?;
       Ok(())
     } else {
       Err(ParseError::ExpectErr(format!("Expected {}, got {}", expected, self.current_token)))
@@ -120,6 +132,7 @@ pub enum ParseError {
   ExpectErr(String),
   UnknownAtom(String),
   InvalidInput(String),
+  NoneError(String),
 }
 
 impl fmt::Display for ParseError {
@@ -127,9 +140,10 @@ impl fmt::Display for ParseError {
     use self::ParseError::*;
 
     match *self {
-      ExpectErr(ref e) => write!(f, "Parsing error: {}", e),
-      UnknownAtom(ref e) => write!(f, "Parsing error: {}", e),
-      InvalidInput(ref e) => write!(f, "Parsing error: {}", e),
+      ExpectErr(ref e) => write!(f, "Error: {}", e),
+      UnknownAtom(ref e) => write!(f, "Error: {}", e),
+      InvalidInput(ref e) => write!(f, "Error: {}", e),
+      NoneError(ref e) => write!(f, "Error: {}", e),
     }
   }
 }
@@ -142,7 +156,14 @@ impl error::Error for ParseError {
       ExpectErr(ref e) => e,
       UnknownAtom(ref e) => e,
       InvalidInput(ref e) => e,
+      NoneError(ref e) => e,
     }
+  }
+}
+
+impl From<NoneError> for ParseError {
+  fn from(err: NoneError) -> Self {
+    ParseError::NoneError(String::from("Invalid character entered."))
   }
 }
 
@@ -152,49 +173,49 @@ mod tests {
 
   #[test]
   fn basic_add() {
-    let mut parser = Parser::new("1+1");
-    let expected_expr = Expr::Add(box Expr::Num(1), box Expr::Num(1));
+    let mut parser = Parser::new("1+1").unwrap();
+    let expected_expr = Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
   #[test]
   fn basic_sub() {
-    let mut parser = Parser::new("1-1");
-    let expected_expr = Expr::Sub(box Expr::Num(1), box Expr::Num(1));
+    let mut parser = Parser::new("1-1").unwrap();
+    let expected_expr = Expr::Sub(box Expr::Num(1.0), box Expr::Num(1.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
   #[test]
   fn basic_mul() {
-    let mut parser = Parser::new("1*1");
-    let expected_expr = Expr::Mul(box Expr::Num(1), box Expr::Num(1));
+    let mut parser = Parser::new("1*1").unwrap();
+    let expected_expr = Expr::Mul(box Expr::Num(1.0), box Expr::Num(1.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
   #[test]
   fn basic_div() {
-    let mut parser = Parser::new("1/1");
-    let expected_expr = Expr::Div(box Expr::Num(1), box Expr::Num(1));
+    let mut parser = Parser::new("1/1").unwrap();
+    let expected_expr = Expr::Div(box Expr::Num(1.0), box Expr::Num(1.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
   #[test]
   fn basic_paren() {
-    let mut parser = Parser::new("1*(1+1)");
-    let expected_expr = Expr::Mul(box Expr::Num(1), box Expr::Add(box Expr::Num(1), box Expr::Num(1)));
+    let mut parser = Parser::new("1*(1+1)").unwrap();
+    let expected_expr = Expr::Mul(box Expr::Num(1.0), box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0)));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
   #[test]
   fn ord_of_ops() {
-    let mut parser = Parser::new("1/(1+1)*1+2");
+    let mut parser = Parser::new("1/(1+1)*1+2").unwrap();
     let expected_expr = Expr::Add(
       box Expr::Mul(
         box Expr::Div(
-          box Expr::Num(1), 
-          box Expr::Add(box Expr::Num(1), box Expr::Num(1))),
-        box Expr::Num(1)),
-      box Expr::Num(2));
+          box Expr::Num(1.0), 
+          box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0))),
+        box Expr::Num(1.0)),
+      box Expr::Num(2.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 }

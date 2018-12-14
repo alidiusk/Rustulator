@@ -18,10 +18,15 @@ pub fn repl() {
           break
         }
 
-        let ast = Parser::new(&line).parse();
+        let parser = Parser::new(&line);
+        let ast = match parser {
+          Err(e)     => Err(e),
+          Ok(mut parser) => parser.parse(),
+        };
+
         match ast {
-          Ok(e) => println!("{}", eval(e)),
-          Err(e) => println!("{:?}", e),
+          Ok(e) => println!("{:.2}", eval(e)),
+          Err(e) => println!("{}", e),
         }
       },
       Err(ReadlineError::Interrupted) => {

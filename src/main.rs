@@ -1,5 +1,6 @@
 #![feature(uniform_paths)]
 #![feature(box_syntax)]
+#![feature(try_trait)]
 
 mod ast;
 mod lexer;

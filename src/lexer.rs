@@ -3,6 +3,9 @@ use crate::ast::{Token};
 use std::str::Chars;
 use std::iter::Peekable;
 
+use std::fmt;
+use std::error;
+
 #[derive(Debug)]
 pub struct Lexer<'a> {
   source: Peekable<Chars<'a>>,
@@ -32,12 +35,13 @@ impl<'a> Iterator for Lexer<'a> {
         for ch in self.source.to_owned().take_while(|ch| ch.is_numeric()) {
           num.push(ch);
         }
-        Some(Token::Num(num.parse::<i32>().unwrap()))
+        Some(Token::Num(num.parse::<f64>().unwrap()))
       },
       Some('+')      => Some(Token::Add),
       Some('-')      => Some(Token::Sub),
       Some('*')      => Some(Token::Mul),
       Some('/')      => Some(Token::Div),
+      Some('^')      => Some(Token::Pow),
       Some('(')      => Some(Token::LParen),
       Some(')')      => Some(Token::RParen),
       None           => Some(Token::Eof),
@@ -56,7 +60,7 @@ mod tests {
   #[test]
   fn test_num_token() {
     let mut lexer = Lexer::new("345671");
-    assert_eq!(Token::Num(345671), lexer.next().unwrap());
+    assert_eq!(Token::Num(345671.0), lexer.next().unwrap());
   }
 
   #[test]
@@ -88,5 +92,30 @@ mod tests {
     let mut lexer = Lexer::new("()");
     assert_eq!(Token::LParen, lexer.next().unwrap());
     assert_eq!(Token::RParen, lexer.next().unwrap());
+  }
+}
+
+#[derive(Debug)]
+pub enum LexError {
+  InvalidChar(String),
+}
+
+impl fmt::Display for LexError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    use self::LexError::*;
+
+    match *self {
+      InvalidChar(ref e) => write!(f, "Lexing error: {}", e),
+    }
+  }
+}
+
+impl error::Error for LexError {
+  fn description(&self) -> &str {
+    use self::LexError::*;
+
+    match *self {
+      InvalidChar(ref e) => e,
+    }
   }
 }
