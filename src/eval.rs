@@ -56,4 +56,12 @@ mod tests {
     let evaled = eval(ast);
     assert_eq!(9.0, evaled);
  }
+
+  #[test]
+  fn paren_expr_mul() {
+    let ast = Parser::new("(3+4)(2+1)").unwrap().parse().unwrap();
+    println!("{:?}", ast);
+    let evaled = eval(ast);
+    assert_eq!(21.0, evaled);
+ }
 }

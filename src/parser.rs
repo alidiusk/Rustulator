@@ -107,6 +107,11 @@ impl<'a> Parser<'a> {
         self.next_token()?;
         let expr = self.parse_expr(Precedence::Lowest)?;
         self.expect(Token::RParen)?;
+        if self.current_token == Token::LParen {
+          let right = self.parse_expr(Precedence::Product)?;
+          return Ok(Expr::Mul(box expr, box right));
+        }
+
         Ok(expr)
       },
       _ => {
