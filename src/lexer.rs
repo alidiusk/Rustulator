@@ -30,11 +30,17 @@ impl<'a> Iterator for Lexer<'a> {
     let c = self.source.next();
     match c {
       Some('0'...'9') => {
+        // safe unwrap - we checked that c was Some() to get hree
         let mut num = c.unwrap().to_string();
-        // FIX THIS AT SOME POINT.
-        for ch in self.source.to_owned().take_while(|ch| ch.is_numeric()) {
-          num.push(ch);
+        while let Some(n) = self.source.peek() {
+          if n.is_numeric() || n == &'.' {
+            // safe unwrap - we checked that n was Some() to get here
+            num.push(self.source.next().unwrap());
+          } else {
+            break;
+          }
         }
+
         Some(Token::Num(num.parse::<f64>().unwrap()))
       },
       Some('+')      => Some(Token::Add),
@@ -53,6 +59,31 @@ impl<'a> Iterator for Lexer<'a> {
   }
 }
 
+#[derive(Debug)]
+pub enum LexError {
+  InvalidChar(String),
+}
+
+impl fmt::Display for LexError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    use self::LexError::*;
+
+    match *self {
+      InvalidChar(ref e) => write!(f, "Lexing error: {}", e),
+    }
+  }
+}
+
+impl error::Error for LexError {
+  fn description(&self) -> &str {
+    use self::LexError::*;
+
+    match *self {
+      InvalidChar(ref e) => e,
+    }
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -61,6 +92,14 @@ mod tests {
   fn test_num_token() {
     let mut lexer = Lexer::new("345671");
     assert_eq!(Token::Num(345671.0), lexer.next().unwrap());
+  }
+
+  #[test]
+  fn test_mult_num_tokens() {
+    let mut lexer = Lexer::new("7560 2371 2903");
+    assert_eq!(Token::Num(7560.0), lexer.next().unwrap());
+    assert_eq!(Token::Num(2371.0), lexer.next().unwrap());
+    assert_eq!(Token::Num(2903.0), lexer.next().unwrap());
   }
 
   #[test]
@@ -92,30 +131,5 @@ mod tests {
     let mut lexer = Lexer::new("()");
     assert_eq!(Token::LParen, lexer.next().unwrap());
     assert_eq!(Token::RParen, lexer.next().unwrap());
-  }
-}
-
-#[derive(Debug)]
-pub enum LexError {
-  InvalidChar(String),
-}
-
-impl fmt::Display for LexError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    use self::LexError::*;
-
-    match *self {
-      InvalidChar(ref e) => write!(f, "Lexing error: {}", e),
-    }
-  }
-}
-
-impl error::Error for LexError {
-  fn description(&self) -> &str {
-    use self::LexError::*;
-
-    match *self {
-      InvalidChar(ref e) => e,
-    }
   }
 }

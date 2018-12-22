@@ -97,7 +97,7 @@ impl<'a> Parser<'a> {
     match token {
       Token::Num(i) => { 
         self.next_token()?;
-        if(self.current_token == Token::LParen) {
+        if self.current_token == Token::LParen {
           let right = self.parse_expr(Precedence::Product)?;
           return Ok(Expr::Mul(box Expr::Num(i), box right));
         }

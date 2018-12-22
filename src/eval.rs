@@ -27,6 +27,13 @@ mod tests {
   }
 
   #[test]
+  fn test_eval2() {
+    let ast = Parser::new("12*2/24 + 1 / 25 - 1.04").unwrap().parse().unwrap();
+    let evaled = eval(ast);
+    assert_eq!(0.0, evaled);
+  }
+
+  #[test]
   fn exp_eval() {
     let ast = Parser::new("2^2").unwrap().parse().unwrap();
     println!("{:?}", ast);
