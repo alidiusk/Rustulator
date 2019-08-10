@@ -1,5 +1,5 @@
-use crate::parser::Parser;
-use crate::eval::eval;
+use calculator::parser::Parser;
+use calculator::eval::eval;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
