@@ -6,8 +6,8 @@ use rustyline::Editor;
 
 pub fn repl() {
   let mut rl = Editor::<()>::new();
-  println!("Welcome to Rusty Calculator!");
-  println!("Currently, integer addition, subtraction, multiplication, and division are supported.");
+  println!("Welcome to Rustulator!");
+  println!("Currently, arithmetic and abs, floor, log, ln, and trig functions are supported.");
   println!("Use Ctrl-C or type #quit to quit.");
   loop {
     let readline = rl.readline(">> ");
