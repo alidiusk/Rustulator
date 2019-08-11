@@ -10,7 +10,17 @@ pub fn eval(ast: Expr) -> f64 {
     Mul(e1, e2) => eval(*e1) * eval(*e2),
     Div(e1, e2) => eval(*e1) / eval(*e2),
     Pow(e1, e2) => (eval(*e1)).powf(eval(*e2)),
-    Neg(e) => -(eval(*e)),
+    Neg(e)      => -(eval(*e)),
+    Abs(e)      => (eval(*e)).abs(),
+    Floor(e)    => (eval(*e)).floor(),
+    Log(e)      => (eval(*e)).log10(),
+    Ln(e)       => (eval(*e)).ln(),
+    Sin(e)      => (eval(*e)).sin(),
+    Cos(e)      => (eval(*e)).cos(),
+    Tan(e)      => (eval(*e)).tan(),
+    Arcsin(e)   => (eval(*e)).asin(),
+    Arccos(e)   => (eval(*e)).acos(),
+    Arctan(e)   => (eval(*e)).atan(),
   }
 }
 

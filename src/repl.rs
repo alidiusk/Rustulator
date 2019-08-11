@@ -25,7 +25,7 @@ pub fn repl() {
         };
 
         match ast {
-          Ok(e) => println!("{:.2}", eval(e)),
+          Ok(e) => println!("{:.5}", eval(e)),
           Err(e) => println!("{}", e),
         }
       },

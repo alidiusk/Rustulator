@@ -9,6 +9,45 @@ pub enum Expr {
   Div(Box<Expr>, Box<Expr>),
   Pow(Box<Expr>, Box<Expr>),
   Neg(Box<Expr>),
+  Abs(Box<Expr>),
+  Floor(Box<Expr>),
+  Log(Box<Expr>),
+  Ln(Box<Expr>),
+  Sin(Box<Expr>),
+  Cos(Box<Expr>),
+  Tan(Box<Expr>),
+  Arcsin(Box<Expr>),
+  Arccos(Box<Expr>),
+  Arctan(Box<Expr>),
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum Func {
+  Abs,
+  Floor,
+  Log,
+  Ln,
+  Sin,
+  Cos,
+  Tan,
+  Arcsin,
+  Arccos,
+  Arctan,
+}
+
+pub fn get_function_token<'a>(s: &'a str) -> Option<Token> {
+  match s {
+    "abs"    => Some(Token::Func(Func::Abs)),
+    "log"    => Some(Token::Func(Func::Log)),
+    "ln"     => Some(Token::Func(Func::Ln)),
+    "sin"    => Some(Token::Func(Func::Sin)),
+    "cos"    => Some(Token::Func(Func::Cos)),
+    "tan"    => Some(Token::Func(Func::Tan)),
+    "arcsin" => Some(Token::Func(Func::Arcsin)),
+    "arccos" => Some(Token::Func(Func::Arccos)),
+    "arctan" => Some(Token::Func(Func::Arctan)),
+    _        => None,
+  }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -21,6 +60,8 @@ pub enum Token {
   Pow,
   RParen,
   LParen,
+  Func(Func),
+  Ident(String),
   Eof,
 }
 
@@ -33,8 +74,8 @@ impl Token {
       Add | Sub => Sum,
       Mul | Div => Product,
       Pow       => Power,
-      // should be unreachable...
-      _ => Lowest,
+      Func(_)   => Function,
+      _         => Lowest,
     }
   }
 }
@@ -45,14 +86,17 @@ impl fmt::Display for Token {
 
     match *self {
       Num(i) => write!(f, "Num({})", i),
-      Add => write!(f, "Add"),
-      Sub => write!(f, "Sub"),
-      Mul => write!(f, "Mul"),
-      Div => write!(f, "Div"),
-      Pow => write!(f, "Pow"),
-      LParen => write!(f, "("),
-      RParen => write!(f, ")"),
-      Eof => write!(f, "Eof"),
+      Add        => write!(f, "Add"),
+      Sub        => write!(f, "Sub"),
+      Mul        => write!(f, "Mul"),
+      Div        => write!(f, "Div"),
+      Pow        => write!(f, "Pow"),
+      LParen     => write!(f, "("),
+      RParen     => write!(f, ")"),
+      // Implement Display for func
+      Func(func) => write!(f, "{:?}", func),
+      Ident(ref s)   => write!(f, "{}", s),
+      Eof        => write!(f, "Eof"),
     }
   }
 }
@@ -63,6 +107,7 @@ pub enum Precedence {
   Sum,
   Product,
   Power,
+  Function,
   Prefix,
 }
 

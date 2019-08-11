@@ -1,4 +1,4 @@
-use crate::ast::{Token};
+use crate::ast::{Token, get_function_token};
 
 use std::str::Chars;
 use std::iter::Peekable;
@@ -29,7 +29,7 @@ impl<'a> Iterator for Lexer<'a> {
   fn next(&mut self) -> Option<Token> {
     let c = self.source.next();
     match c {
-      Some('0'...'9') => {
+      Some('0'..='9') => {
         // safe unwrap - we checked that c was Some() to get hree
         let mut num = c.unwrap().to_string();
         while let Some(n) = self.source.peek() {
@@ -42,6 +42,21 @@ impl<'a> Iterator for Lexer<'a> {
         }
 
         Some(Token::Num(num.parse::<f64>().unwrap()))
+      },
+      Some('a'..='z') | Some('A'..='Z') => {
+        let mut ident = c.unwrap().to_string();
+        while let Some(ch) = self.source.peek() {
+          if ch.is_alphabetic() {
+            ident.push(self.source.next().unwrap());
+          } else {
+            break;
+          }
+        }
+
+        match get_function_token(ident.as_str()) {
+          Some(Token::Func(f)) => Some(Token::Func(f)),
+          _                    => Some(Token::Ident(ident)),
+        }
       },
       Some('+')      => Some(Token::Add),
       Some('-')      => Some(Token::Sub),

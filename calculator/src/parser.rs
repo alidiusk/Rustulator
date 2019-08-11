@@ -3,7 +3,7 @@ use std::option::NoneError;
 
 use std::fmt;
 
-use crate::ast::{Expr, Precedence, Token};
+use crate::ast::{Expr, Func, Precedence, Token};
 use crate::lexer::{Lexer};
 
 #[derive(Debug)]
@@ -44,8 +44,6 @@ impl<'a> Parser<'a> {
   }
 
   fn parse_expr(&mut self, prec: Precedence) -> Result<Expr, ParseError> {
-    use crate::ast::Token;
-
     let mut left = self.parse_atom()?;
     while prec < self.current_token.get_precedence() {
       if self.current_token == Token::Eof {
@@ -97,12 +95,24 @@ impl<'a> Parser<'a> {
     match token {
       Token::Num(i) => { 
         self.next_token()?;
-        if self.current_token == Token::LParen {
-          let right = self.parse_expr(Precedence::Product)?;
-          return Ok(Expr::Mul(box Expr::Num(i), box right));
+        match self.current_token {
+          Token::LParen => {
+            let right = self.parse_expr(Precedence::Product)?;
+            return Ok(Expr::Mul(box Expr::Num(i), box right));
+          },
+          Token::Func(f) => {
+            self.next_token()?;
+            let right = self.parse_expr(Precedence::Product)?;
+            return Ok(Expr::Mul(box Expr::Num(i), box Self::function_expr(f, right)));
+          },
+          _ => Ok(Expr::Num(i)),
         }
-        Ok(Expr::Num(i))
       },
+      Token::Func(f) => {
+        self.next_token()?;
+        let expr = self.parse_expr(Precedence::Function)?;
+        Ok(Self::function_expr(f, expr))
+      }
       Token::LParen => {
         self.next_token()?;
         let expr = self.parse_expr(Precedence::Lowest)?;
@@ -126,6 +136,23 @@ impl<'a> Parser<'a> {
       Ok(())
     } else {
       Err(ParseError::ExpectErr(format!("Expected {}, got {}", expected, self.current_token)))
+    }
+  }
+
+  // Takes a Func::Func and an expression and 
+  // returns the corresponding function expr. 
+  fn function_expr(f: Func, e: Expr) -> Expr {
+    match f {
+      Func::Abs => Expr::Abs(box e),
+      Func::Floor => Expr::Floor(box e),
+      Func::Log => Expr::Log(box e),
+      Func::Ln => Expr::Ln(box e),
+      Func::Sin => Expr::Sin(box e),
+      Func::Cos => Expr::Cos(box e),
+      Func::Tan => Expr::Tan(box e),
+      Func::Arcsin => Expr::Arcsin(box e),
+      Func::Arccos => Expr::Arccos(box e),
+      Func::Arctan => Expr::Arctan(box e),
     }
   }
 }
@@ -167,7 +194,7 @@ impl error::Error for ParseError {
 }
 
 impl From<NoneError> for ParseError {
-  fn from(err: NoneError) -> Self {
+  fn from(_err: NoneError) -> Self {
     ParseError::NoneError(String::from("Invalid character entered."))
   }
 }
@@ -208,6 +235,20 @@ mod tests {
   fn basic_paren() {
     let mut parser = Parser::new("1*(1+1)").unwrap();
     let expected_expr = Expr::Mul(box Expr::Num(1.0), box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0)));
+    assert_eq!(parser.parse().unwrap(), expected_expr);
+  }
+
+  #[test]
+  fn basic_func() {
+    let mut parser = Parser::new("sin(1 + 1)").unwrap();
+    let expected_expr = Expr::Sin(box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0)));
+    assert_eq!(parser.parse().unwrap(), expected_expr);
+  }
+
+  #[test]
+  fn func_multiplication() {
+    let mut parser = Parser::new("5sin(1 + 1)").unwrap();
+    let expected_expr = Expr::Mul(box Expr::Num(5.0), box Expr::Sin(box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0))));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
