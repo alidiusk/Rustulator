@@ -19,6 +19,9 @@ pub enum Expr {
   Arcsin(Box<Expr>),
   Arccos(Box<Expr>),
   Arctan(Box<Expr>),
+  Ident(String),
+  // First can only actually be Ident 
+  Assign(String, Box<Expr>)
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -38,6 +41,7 @@ pub enum Func {
 pub fn get_function_token<'a>(s: &'a str) -> Option<Token> {
   match s {
     "abs"    => Some(Token::Func(Func::Abs)),
+    "floor"  => Some(Token::Func(Func::Floor)),
     "log"    => Some(Token::Func(Func::Log)),
     "ln"     => Some(Token::Func(Func::Ln)),
     "sin"    => Some(Token::Func(Func::Sin)),
@@ -60,6 +64,7 @@ pub enum Token {
   Pow,
   RParen,
   LParen,
+  Equals,
   Func(Func),
   Ident(String),
   Eof,
@@ -75,6 +80,7 @@ impl Token {
       Mul | Div => Product,
       Pow       => Power,
       Func(_)   => Function,
+      Equals    => Assign,
       _         => Lowest,
     }
   }
@@ -93,6 +99,7 @@ impl fmt::Display for Token {
       Pow        => write!(f, "Pow"),
       LParen     => write!(f, "("),
       RParen     => write!(f, ")"),
+      Equals     => write!(f, "="),
       // Implement Display for func
       Func(func) => write!(f, "{:?}", func),
       Ident(ref s)   => write!(f, "{}", s),
@@ -109,6 +116,7 @@ pub enum Precedence {
   Power,
   Function,
   Prefix,
+  Assign,
 }
 
 #[cfg(test)]

@@ -58,6 +58,7 @@ impl<'a> Iterator for Lexer<'a> {
           _                    => Some(Token::Ident(ident)),
         }
       },
+      Some('=')      => Some(Token::Equals),
       Some('+')      => Some(Token::Add),
       Some('-')      => Some(Token::Sub),
       Some('*')      => Some(Token::Mul),
@@ -146,5 +147,11 @@ mod tests {
     let mut lexer = Lexer::new("()");
     assert_eq!(Token::LParen, lexer.next().unwrap());
     assert_eq!(Token::RParen, lexer.next().unwrap());
+  }
+
+  #[test]
+  fn test_ident() {
+    let mut lexer = Lexer::new("lol");
+    assert_eq!(Token::Ident("lol".to_string()), lexer.next().unwrap());
   }
 }

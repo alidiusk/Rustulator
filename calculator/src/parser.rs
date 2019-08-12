@@ -1,7 +1,6 @@
 use std::error;
-use std::option::NoneError;
-
 use std::fmt;
+use std::option::NoneError;
 
 use crate::ast::{Expr, Func, Precedence, Token};
 use crate::lexer::{Lexer};
@@ -14,6 +13,7 @@ pub struct Parser<'a> {
   // technically isn't even necessary, but I'm keeping it 
   // in case it is needed for future additions.
   peek_token: Token,
+  // Constants and then variable assignment
 }
 
 impl<'a> Parser<'a> {
@@ -93,17 +93,17 @@ impl<'a> Parser<'a> {
   fn parse_atom(&mut self) -> Result<Expr, ParseError> {
     let token = self.current_token.clone();
     match token {
+      Token::Sub => {
+        self.next_token()?;
+        let expr = self.parse_expr(Precedence::Prefix)?;
+        Ok(Expr::Neg(box expr))
+      },
       Token::Num(i) => { 
         self.next_token()?;
         match self.current_token {
-          Token::LParen => {
+          Token::LParen | Token::Func(_) | Token::Ident(_) => {
             let right = self.parse_expr(Precedence::Product)?;
             return Ok(Expr::Mul(box Expr::Num(i), box right));
-          },
-          Token::Func(f) => {
-            self.next_token()?;
-            let right = self.parse_expr(Precedence::Product)?;
-            return Ok(Expr::Mul(box Expr::Num(i), box Self::function_expr(f, right)));
           },
           _ => Ok(Expr::Num(i)),
         }
@@ -112,7 +112,22 @@ impl<'a> Parser<'a> {
         self.next_token()?;
         let expr = self.parse_expr(Precedence::Function)?;
         Ok(Self::function_expr(f, expr))
-      }
+      },
+      Token::Ident(ident) => {
+        self.next_token()?;
+        match self.current_token {
+          Token::Equals => {
+            self.next_token()?;
+            let expr = self.parse_expr(Precedence::Assign)?;
+            return Ok(Expr::Assign(ident, box expr));
+          },
+          Token::LParen | Token::Num(_) | Token::Func(_) => {
+            let right = self.parse_expr(Precedence::Product)?;
+            return Ok(Expr::Mul(box Expr::Ident(ident), box right));
+          },
+          _ => Ok(Expr::Ident(ident)),
+        }
+      },
       Token::LParen => {
         self.next_token()?;
         let expr = self.parse_expr(Precedence::Lowest)?;
@@ -249,6 +264,20 @@ mod tests {
   fn func_multiplication() {
     let mut parser = Parser::new("5sin(1 + 1)").unwrap();
     let expected_expr = Expr::Mul(box Expr::Num(5.0), box Expr::Sin(box Expr::Add(box Expr::Num(1.0), box Expr::Num(1.0))));
+    assert_eq!(parser.parse().unwrap(), expected_expr);
+  }
+
+  #[test]
+  fn constant() {
+    let mut parser = Parser::new("pi").unwrap();
+    let expected_expr = Expr::Ident("pi".to_string());
+    assert_eq!(parser.parse().unwrap(), expected_expr);
+  }
+
+  #[test]
+  fn assignment() {
+    let mut parser = Parser::new("a = 5").unwrap();
+    let expected_expr = Expr::Assign("a".to_string(), box Expr::Num(5.0));
     assert_eq!(parser.parse().unwrap(), expected_expr);
   }
 
