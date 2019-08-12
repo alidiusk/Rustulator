@@ -1,6 +1,4 @@
-mod repl;
-
-use crate::repl::repl;
+use repl::repl;
 
 fn main() {
   repl();
