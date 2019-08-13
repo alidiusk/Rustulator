@@ -32,8 +32,27 @@ impl Calculator {
     }
   }
 
+  fn balance_parens<'a>(s: &'a str) -> String {
+    let num = s.chars().fold(0, |acc, c| 
+      if c == '(' { 
+        acc + 1 
+      } else if c == ')' { 
+        acc - 1
+      } else { 
+        acc 
+      });
+    if num == 0 {
+      s.to_string()
+    } else if num > 0 {
+      [s, ")".repeat(num).as_str()].concat()
+    } else {
+      s[0..s.len()-num].to_string()
+    }
+  }
+
   pub fn calculate<'a>(&mut self, calc: &'a str) -> Result<f64, CalculatorError> {
-    let mut parser = Parser::new(calc).unwrap();
+    let calc = Self::balance_parens(calc);
+    let mut parser = Parser::new(&calc).unwrap();
     let val = eval(parser.parse()?, &mut self.env)?;
     self.calcs.push((calc.to_string(), val));
     Ok(val)

@@ -1,0 +1,9 @@
+{% extends "base" %}
+
+{% block content %}
+    <h1>Rustulator</h1>
+    <p>Calculator in Rust</p>
+    <form action="/" method="post">
+      <input name="calc" type="text" />
+    </form>
+{% endblock content %}

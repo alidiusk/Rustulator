@@ -6,4 +6,10 @@ edition = "2018"
 
 [dependencies]
 calculator = { path = "calculator" }
-repl = { path = "repl" }
+rustyline = "5.0.1"
+rocket = "0.4.2"
+
+[dependencies.rocket_contrib]
+version = "0.4.2"
+default-features = false
+features = ["handlebars_templates", "tera_templates"] 
