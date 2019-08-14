@@ -1,3 +1,7 @@
+//! # Lexer
+//! 
+//! Handles the tokenization of raw &str input.
+
 use crate::ast::{Token, get_function_token};
 
 use std::str::Chars;
@@ -7,6 +11,7 @@ use std::fmt;
 use std::error;
 
 #[derive(Debug)]
+/// Iterator that emits Tokens.
 pub struct Lexer<'a> {
   source: Peekable<Chars<'a>>,
 }
@@ -76,6 +81,7 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 #[derive(Debug)]
+/// Defines the various errors that can occur during evaluation.
 pub enum LexError {
   InvalidChar(String),
 }

@@ -1,6 +1,12 @@
+//! # Ast
+//!
+//! Contains all the types required to construct an AST for any mathematical expression.
+
 use std::fmt;
 
 #[derive(Debug, PartialEq, Clone)]
+/// Defines all the different kinds of mathematical expressions
+/// as recursive types.
 pub enum Expr {
   Num(f64),
   Add(Box<Expr>, Box<Expr>),
@@ -25,6 +31,7 @@ pub enum Expr {
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
+/// Defines all the supported functions.
 pub enum Func {
   Abs,
   Floor,
@@ -38,6 +45,8 @@ pub enum Func {
   Arctan,
 }
 
+/// Takes a &str and returns a corresponding function token,
+/// if there is one. Otherwise it returns None.
 pub fn get_function_token<'a>(s: &'a str) -> Option<Token> {
   match s {
     "abs"    => Some(Token::Func(Func::Abs)),
@@ -55,6 +64,7 @@ pub fn get_function_token<'a>(s: &'a str) -> Option<Token> {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+/// Defines all the valid Token types. 
 pub enum Token {
   Num(f64),
   Add,
@@ -71,6 +81,7 @@ pub enum Token {
 }
 
 impl Token {
+  /// Returns the precedence of this Token.
   pub fn get_precedence(&self) -> Precedence {
     use self::Token::*;
     use self::Precedence::*;
@@ -109,6 +120,7 @@ impl fmt::Display for Token {
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]
+/// Defines all the Precedence levels, from lowest to highest.
 pub enum Precedence {
   Lowest,
   Sum,

@@ -1,9 +1,14 @@
+//! # Eval
+//!
+//! Handles the evaluation of expressions.
+
 use crate::ast::Expr;
 
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
 
+/// Given an `Expr`, recursively evaluate it and return the result.
 pub fn eval(ast: Expr, env: &mut HashMap<String, f64>) -> Result<f64, EvalError> {
   use crate::ast::Expr::*;
 
@@ -40,6 +45,7 @@ pub fn eval(ast: Expr, env: &mut HashMap<String, f64>) -> Result<f64, EvalError>
 }
 
 #[derive(Debug)]
+/// Defines the various errors that can occur during evaluation.
 pub enum EvalError {
   UnknownVar(String),
 }

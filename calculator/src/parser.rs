@@ -1,3 +1,8 @@
+//! # Parser
+//! 
+//! Handles the parsing of a mathematical expression to construct
+//! an AST that can be evaluated.
+
 use std::error;
 use std::fmt;
 use std::option::NoneError;
@@ -6,6 +11,7 @@ use crate::ast::{Expr, Func, Precedence, Token};
 use crate::lexer::{Lexer};
 
 #[derive(Debug)]
+/// Object that takes a `&str` and returns a AST of `Expr`.
 pub struct Parser<'a> {
   lexer: Lexer<'a>,
   current_token: Token,
@@ -17,6 +23,8 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+  /// Takes a `&str` and returns a `Parser`. If the source is somehow invalid,
+  /// it will return a `ParseError`.
   pub fn new(source: &'a str) -> Result<Self, ParseError> {
     let mut lexer = Lexer::new(source);
     let cur = lexer.next()?;
@@ -29,12 +37,15 @@ impl<'a> Parser<'a> {
     })
   }
 
+  /// Steps into the next token.
   fn next_token(&mut self) -> Result<(), ParseError> {
     self.current_token = self.peek_token.clone();
     self.peek_token = self.lexer.next()?;
     Ok(())
   }
   
+  /// Returns a single Expr that represents the AST of the entire computation.
+  /// If there was an error during parsing, returns a `ParseError`.
   pub fn parse(&mut self) -> Result<Expr, ParseError> {
     let expr = self.parse_expr(Precedence::Lowest);
     match expr {
@@ -56,11 +67,16 @@ impl<'a> Parser<'a> {
     Ok(left)
   }
 
+  /// Parses an expression with an infix operator. Takes the left expression and
+  /// then parses the right before returning an `Expr` that combines the two.
   fn parse_infix_op(&mut self, left: Expr) -> Result<Expr, ParseError> {
     match self.current_token {
       Token::Add => {
+        // Consume the token
         self.next_token()?;
+        // Get the right expression
         let right = self.parse_expr(Precedence::Sum)?;
+        // Return an Add of the left and right 
         Ok(Expr::Add(box left, box right))
       },
       Token::Sub => {
@@ -90,6 +106,8 @@ impl<'a> Parser<'a> {
     }
   }
 
+  /// Parses a single atom of an expression. This can be just a number or 
+  /// an entire sub expression.
   fn parse_atom(&mut self) -> Result<Expr, ParseError> {
     let token = self.current_token.clone();
     match token {
@@ -145,6 +163,8 @@ impl<'a> Parser<'a> {
     }
   }
 
+  /// Consume the current `Token` if it is what is expected, else return a
+  /// `ParseError`.
   fn expect(&mut self, expected: Token) -> Result<(), ParseError> {
     if expected == self.current_token {
       self.next_token()?;
@@ -175,6 +195,7 @@ impl<'a> Parser<'a> {
 // Error handling will need to be improved.
 
 #[derive(Debug)]
+/// Defines the various errors that can occur during parsing.
 pub enum ParseError {
   ExpectErr(String),
   UnknownAtom(String),

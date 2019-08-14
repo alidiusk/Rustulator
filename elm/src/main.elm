@@ -46,7 +46,7 @@ subscriptions model =
 calculate : String -> Cmd Msg
 calculate input =
   Http.post
-    { url = "http://localhost:8000/"
+    { url = "/"
     , body = Http.jsonBody (calcEncoder input)
     , expect = Http.expectJson GotCalc calcDecoder
     }
