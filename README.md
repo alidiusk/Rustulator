@@ -1,7 +1,7 @@
 # Rustulator
 A basic scientific calculator implemented in Rust.
 
-[![asciicast](https://asciinema.org/a/14.png)](https://asciinema.org/a/14)
+[![asciicast](https://asciinema.org/a/Q6DRLAReFxHDhoFD7mEQQ6CoG.svg)](https://asciinema.org/a/Q6DRLAReFxHDhoFD7mEQQ6CoG)
 
 Supports:
   - Arithmetic
