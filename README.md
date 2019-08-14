@@ -1,6 +1,8 @@
 # Rustulator
 A basic scientific calculator implemented in Rust.
 
+[![asciicast](https://asciinema.org/a/14.png)](https://asciinema.org/a/14)
+
 Supports:
   - Arithmetic
   - Sin, Cos, Tan, Arcsin, Arccos, Arctan
