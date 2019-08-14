@@ -1,13 +1,14 @@
 use std::sync::RwLock;
 use std::collections::HashMap;
 
-use rocket::{FromForm, get, post, State};
-use rocket::request::Form;
+use rocket::{get, post, State};
+use rocket_contrib::json::Json;
 use rocket_contrib::templates::Template;
+use serde_derive::{Serialize, Deserialize};
 
 use calculator::calc::Calculator;
 
-#[derive(FromForm)]
+#[derive(Serialize, Deserialize)]
 pub struct Calculation {
   calc: String,
 }
@@ -18,15 +19,15 @@ pub fn get_index() -> Template {
   Template::render("index", &context)
 }
 
-#[post("/", data = "<calculation>")]
-pub fn post_index(calculator: State<RwLock<Calculator>>, calculation: Form<Calculation>) -> Template {
-  let input = &calculation.calc;
+#[post("/calculate", format = "application/json", data = "<calculation>")]
+pub fn calculate(calculator: State<RwLock<Calculator>>, calculation: Json<Calculation>) -> Json<String> {
+  let input = &calculation.0.calc;
   let mut calc = calculator.write().unwrap();
   let output = match calc.calculate(input) {
     Ok(n) => format!("{}", n),
     Err(e)  => format!("{}", e),
   };
-  let mut context = HashMap::new();
-  context.insert("output".to_string(), output);
-  Template::render("output", &context)
+  Json(output)
 }
+
+
