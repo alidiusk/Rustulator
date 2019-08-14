@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 calculator = { path = "calculator" }
+clap = "2.33.0"
 rustyline = "5.0.1"
 rocket = "0.4.2"
 rocket_cors = "0.5.0"

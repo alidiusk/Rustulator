@@ -46,7 +46,7 @@ subscriptions model =
 calculate : String -> Cmd Msg
 calculate input =
   Http.post
-    { url = "http://localhost:8001/calculate"
+    { url = "http://localhost:8000/"
     , body = Http.jsonBody (calcEncoder input)
     , expect = Http.expectJson GotCalc calcDecoder
     }
@@ -83,20 +83,22 @@ calcForm model =
     ]
     [ Form.group []
        -- [ Form.label [] [ text "Calculation" ]
-      [ Input.text [ Input.attrs [ placeholder "Calculation", onInput SetCalc ] ]
+      [ Input.text [ Input.attrs [ Html.Attributes.value model.input, placeholder "Calculation", onInput SetCalc ] ]
       ]
     , Button.button [ Button.primary ] [ text "Calculate" ]
     ]
 
 view : Model -> Html Msg
 view model =
-  Grid.container [ class "center" ]
-    [ h2 [ class "text-center" ] [ text "Rustulator" ]
-    , Grid.container [ class "border" ] <| List.concatMap (\(i, v) -> 
-      [ Grid.row [] 
+  Grid.container [ style "text-align" "center", style "offsetHeight" "50%"]
+    [ CDN.stylesheet
+    , h2 [ class "text-center" ] [ text "Rustulator" ]
+    , Grid.container [ style "display" "inline-block", class "border", style "width" "66%" ] 
+      <| List.concatMap (\(i, v) -> 
+      [ Grid.row [ Row.centerXs ] 
         [ Grid.col [ Col.xs6, Col.textAlign Text.alignXsLeft  ] [ text i ] 
         , Grid.col [ Col.xs6, Col.textAlign Text.alignXsRight ] [ text ("= " ++ v) ] 
         ]
       ]) model.log
-    , Grid.row [ Row.centerXs ] [ Grid.col [ Col.xsAuto ] [ calcForm model ] ]
+    , Grid.row [ Row.centerXs ] [ Grid.col [ Col.xs4 ] [ calcForm model ] ]
     ]

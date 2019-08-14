@@ -1,6 +1,0 @@
-{% extends "base" %}
-
-{% block content %}
-    <h1>Rustulator</h1>
-    <p>Result: {{ output }}</p>
-{% endblock content %}

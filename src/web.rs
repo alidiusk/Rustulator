@@ -1,9 +1,9 @@
+use std::io;
 use std::sync::RwLock;
-use std::collections::HashMap;
 
 use rocket::{get, post, State};
+use rocket::response::NamedFile;
 use rocket_contrib::json::Json;
-use rocket_contrib::templates::Template;
 use serde_derive::{Serialize, Deserialize};
 
 use calculator::calc::Calculator;
@@ -14,12 +14,11 @@ pub struct Calculation {
 }
 
 #[get("/")]
-pub fn get_index() -> Template {
-  let context: HashMap<String, String> = HashMap::new();
-  Template::render("index", &context)
+pub fn get_index() -> io::Result<NamedFile> {
+  NamedFile::open("static/index.html")
 }
 
-#[post("/calculate", format = "application/json", data = "<calculation>")]
+#[post("/", format = "application/json", data = "<calculation>")]
 pub fn calculate(calculator: State<RwLock<Calculator>>, calculation: Json<Calculation>) -> Json<String> {
   let input = &calculation.0.calc;
   let mut calc = calculator.write().unwrap();

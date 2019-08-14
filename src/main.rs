@@ -6,15 +6,16 @@ mod web;
 use std::sync::RwLock;
 
 use calculator::calc::Calculator;
-use rocket::{get, routes};
+use clap::{App, SubCommand};
+use rocket::{routes};
 use rocket::http::Method;
 use rocket_contrib::templates::Template;
-use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
 
 use crate::repl::repl;
 use crate::web::*;
 
-fn main() {
+fn run_rocket() {
   let allowed_origins = AllowedOrigins::all();
 
   // You can also deserialize this
@@ -33,4 +34,27 @@ fn main() {
     .attach(Template::fairing())
     .attach(cors)
     .launch();
+}
+
+fn run_repl() {
+  repl();
+}
+
+fn main() {
+  let matches = App::new("Rustulator")
+                  .version("0.9")
+                  .author("Liam Woodward <liamowoodward@gmail.com>")
+                  .about("Calculator REPL/Web interface")
+                  .subcommand(SubCommand::with_name("repl")
+                    .about("Starts the Rustulator repl"))
+                  .subcommand(SubCommand::with_name("web")
+                    .about("Starts the Rustulator web interface"))
+                  .get_matches();
+
+  if let Some(_) = matches.subcommand_matches("repl") {
+    run_repl();
+  }
+  if let Some(_) = matches.subcommand_matches("web") {
+    run_rocket();
+  }
 }

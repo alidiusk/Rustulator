@@ -5967,6 +5967,7 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
+var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -6296,7 +6297,6 @@ var elm$core$Maybe$map = F2(
 	});
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
 var elm$html$Html$Attributes$readonly = elm$html$Html$Attributes$boolProperty('readOnly');
-var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var rundis$elm_bootstrap$Bootstrap$Form$Input$applyModifier = F2(
 	function (modifier, options) {
 		switch (modifier.$) {
@@ -6484,6 +6484,7 @@ var author$project$Main$calcForm = function (model) {
 								rundis$elm_bootstrap$Bootstrap$Form$Input$attrs(
 								_List_fromArray(
 									[
+										elm$html$Html$Attributes$value(model.input),
 										elm$html$Html$Attributes$placeholder('Calculation'),
 										elm$html$Html$Events$onInput(author$project$Main$SetCalc)
 									]))
@@ -6516,6 +6517,8 @@ var elm$core$List$concatMap = F2(
 			A2(elm$core$List$map, f, list));
 	});
 var elm$html$Html$h2 = _VirtualDom_node('h2');
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var rundis$elm_bootstrap$Bootstrap$Grid$Column = function (a) {
 	return {$: 'Column', a: a};
 };
@@ -7342,7 +7345,7 @@ var rundis$elm_bootstrap$Bootstrap$Grid$Internal$TextAlign = function (a) {
 var rundis$elm_bootstrap$Bootstrap$Grid$Col$textAlign = function (align) {
 	return rundis$elm_bootstrap$Bootstrap$Grid$Internal$TextAlign(align);
 };
-var rundis$elm_bootstrap$Bootstrap$Grid$Internal$Col6 = {$: 'Col6'};
+var rundis$elm_bootstrap$Bootstrap$Grid$Internal$Col4 = {$: 'Col4'};
 var rundis$elm_bootstrap$Bootstrap$Grid$Internal$ColWidth = function (a) {
 	return {$: 'ColWidth', a: a};
 };
@@ -7351,9 +7354,9 @@ var rundis$elm_bootstrap$Bootstrap$Grid$Internal$width = F2(
 		return rundis$elm_bootstrap$Bootstrap$Grid$Internal$ColWidth(
 			A2(rundis$elm_bootstrap$Bootstrap$Grid$Internal$Width, size, count));
 	});
+var rundis$elm_bootstrap$Bootstrap$Grid$Col$xs4 = A2(rundis$elm_bootstrap$Bootstrap$Grid$Internal$width, rundis$elm_bootstrap$Bootstrap$General$Internal$XS, rundis$elm_bootstrap$Bootstrap$Grid$Internal$Col4);
+var rundis$elm_bootstrap$Bootstrap$Grid$Internal$Col6 = {$: 'Col6'};
 var rundis$elm_bootstrap$Bootstrap$Grid$Col$xs6 = A2(rundis$elm_bootstrap$Bootstrap$Grid$Internal$width, rundis$elm_bootstrap$Bootstrap$General$Internal$XS, rundis$elm_bootstrap$Bootstrap$Grid$Internal$Col6);
-var rundis$elm_bootstrap$Bootstrap$Grid$Internal$ColAuto = {$: 'ColAuto'};
-var rundis$elm_bootstrap$Bootstrap$Grid$Col$xsAuto = A2(rundis$elm_bootstrap$Bootstrap$Grid$Internal$width, rundis$elm_bootstrap$Bootstrap$General$Internal$XS, rundis$elm_bootstrap$Bootstrap$Grid$Internal$ColAuto);
 var rundis$elm_bootstrap$Bootstrap$General$Internal$Center = {$: 'Center'};
 var rundis$elm_bootstrap$Bootstrap$General$Internal$HAlign = F2(
 	function (screenSize, align) {
@@ -7380,7 +7383,8 @@ var author$project$Main$view = function (model) {
 		rundis$elm_bootstrap$Bootstrap$Grid$container,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('center')
+				A2(elm$html$Html$Attributes$style, 'text-align', 'center'),
+				A2(elm$html$Html$Attributes$style, 'offsetHeight', '50%')
 			]),
 		_List_fromArray(
 			[
@@ -7398,7 +7402,9 @@ var author$project$Main$view = function (model) {
 				rundis$elm_bootstrap$Bootstrap$Grid$container,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('border')
+						A2(elm$html$Html$Attributes$style, 'display', 'inline-block'),
+						elm$html$Html$Attributes$class('border'),
+						A2(elm$html$Html$Attributes$style, 'width', '66%')
 					]),
 				A2(
 					elm$core$List$concatMap,
@@ -7409,7 +7415,8 @@ var author$project$Main$view = function (model) {
 							[
 								A2(
 								rundis$elm_bootstrap$Bootstrap$Grid$row,
-								_List_Nil,
+								_List_fromArray(
+									[rundis$elm_bootstrap$Bootstrap$Grid$Row$centerXs]),
 								_List_fromArray(
 									[
 										A2(
@@ -7447,7 +7454,7 @@ var author$project$Main$view = function (model) {
 						A2(
 						rundis$elm_bootstrap$Bootstrap$Grid$col,
 						_List_fromArray(
-							[rundis$elm_bootstrap$Bootstrap$Grid$Col$xsAuto]),
+							[rundis$elm_bootstrap$Bootstrap$Grid$Col$xs4]),
 						_List_fromArray(
 							[
 								author$project$Main$calcForm(model)
