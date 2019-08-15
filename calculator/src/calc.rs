@@ -74,7 +74,7 @@ impl Calculator {
   /// Returns a `CalculatorError` in the event evaluation fails.
   pub fn calculate<'a>(&mut self, calc: &'a str) -> Result<f64, CalculatorError> {
     let calc = Self::balance_parens(calc);
-    let mut parser = Parser::new(&calc).unwrap();
+    let mut parser = Parser::new(&calc)?;
     let val = eval(parser.parse()?, &mut self.env)?;
     self.calcs.push((calc.to_string(), val));
     Ok(val)
