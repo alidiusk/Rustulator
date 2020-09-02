@@ -8,13 +8,13 @@ edition = "2018"
 calculator = { path = "calculator" }
 clap = "2.33.0"
 rustyline = "5.0.1"
-rocket = "0.4.2"
-rocket_cors = "0.5.0"
+rocket = "0.4.5"
+rocket_cors = "0.5.1"
 serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
 
 [dependencies.rocket_contrib]
-version = "0.4.2"
+version = "0.4.5"
 default-features = false
-features = ["json", "handlebars_templates", "tera_templates"] 
+features = ["json", "handlebars_templates", "tera_templates"]
